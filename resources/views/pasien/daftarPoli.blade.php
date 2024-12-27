@@ -11,7 +11,7 @@
             
                 <div class="mb-3">
                     <label for="nama">No RM</label>
-                    <input type="text" name="nama" class="form-control" placeholder="diambil dari no rm pasien login" readonly/>
+                    <input type="text" name="nama" class="form-control" value="{{ $user->no_rm }}" readonly/>
                     @error('nama') <span class="text-danger">{{ $message }} </span> @enderror
                 </div>
                 <div class="mb-3">

@@ -6,8 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class DaftarPoli extends Model
 {
-    public function jadwals()
+    
+    public function pasiens()
     {
-        return $this->hasMany(JadwalPeriksa::class, 'id_poli');
+        return $this->belongsTo(Pasien::class, 'id_pasien');
     }
 }

@@ -33,4 +33,8 @@ class Pasien extends Authenticatable
             }
         });
     }
+    public function pasiens()
+    {
+        return $this->hasMany(DaftarPoli::class);
+    }
 }

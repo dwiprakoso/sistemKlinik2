@@ -18,4 +18,8 @@ class Poli extends Model
     {
         return $this->hasMany(Dokter::class);
     }
+    public function poli()
+    {
+        return $this->belongsTo(Poli::class, 'id_poli');
+    }
 }

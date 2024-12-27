@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Pasien;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class PasienController extends Controller
 {
@@ -58,7 +59,9 @@ class PasienController extends Controller
      * Display the specified resource.
      */
     public function daftarPoli(){
-        return view('pasien.daftarPoli');
+        $user = Auth::guard('pasien')->user();
+        //  return view('dokter.form.updateProfil', compact('user'));
+        return view('pasien.daftarPoli', compact('user'));
     }
     public function show(string $id)
     {
