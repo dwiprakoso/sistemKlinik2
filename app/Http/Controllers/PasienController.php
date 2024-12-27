@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Poli;
 use App\Models\Pasien;
+use App\Models\DaftarPoli;
 use Illuminate\Http\Request;
+use App\Models\JadwalPeriksa;
 use Illuminate\Support\Facades\Auth;
 
 class PasienController extends Controller
@@ -58,11 +61,34 @@ class PasienController extends Controller
     /**
      * Display the specified resource.
      */
-    public function daftarPoli(){
+    public function daftarPoli(Request $request)
+    {
         $user = Auth::guard('pasien')->user();
-        //  return view('dokter.form.updateProfil', compact('user'));
-        return view('pasien.daftarPoli', compact('user'));
+        $polis = Poli::all();
+
+        if ($request->ajax()) {
+            $id_poli = $request->input('id_poli');
+            $jadwalDokters = [];
+
+            if ($id_poli) {
+                $jadwalDokters = JadwalPeriksa::with('dokter.poli')
+                    ->whereHas('dokter', function ($query) use ($id_poli) {
+                        $query->where('id_poli', $id_poli);
+                    })
+                    ->get();
+                // Debugging - pastikan data yang diterima
+                dd($jadwalDokters);
+            }
+
+            return response()->json($jadwalDokters);
+        }
+
+        return view('pasien.daftarPoli', compact('user', 'polis'));
     }
+
+
+
+
     public function show(string $id)
     {
         //

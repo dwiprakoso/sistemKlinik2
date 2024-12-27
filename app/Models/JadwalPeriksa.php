@@ -14,7 +14,7 @@ class JadwalPeriksa extends Model
     protected $appends = ['status'];
 
 
-    // Relasi ke dokter
+    // Relasi ke tabel dokters
     public function dokter()
     {
         return $this->belongsTo(Dokter::class, 'id_dokter');
