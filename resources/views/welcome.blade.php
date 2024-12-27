@@ -94,7 +94,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>Welcome to Our System</h1>
+        <h1>Welcome to Sistem Temu Dokter</h1>
         <div class="row">
             <!-- Card for Patients -->
             <div class="card">
