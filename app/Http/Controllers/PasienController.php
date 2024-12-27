@@ -76,8 +76,9 @@ class PasienController extends Controller
                         $query->where('id_poli', $id_poli);
                     })
                     ->get();
+
                 // Debugging - pastikan data yang diterima
-                dd($jadwalDokters);
+                dd($jadwalDokters); // Periksa apakah jadwal dokter sudah ada
             }
 
             return response()->json($jadwalDokters);

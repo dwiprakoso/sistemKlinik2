@@ -73,6 +73,7 @@ Route::middleware('auth:dokter')->group(function () {
 // Proteksi untuk route pasien
 Route::middleware('auth:pasien')->group(function () {
     Route::get('/pasien/dashboard', [PasienController::class, 'index'])->name('pasien.dashboard');
+    // Route untuk menangani request AJAX
     Route::get('/pasien/daftar-poli', [PasienController::class, 'daftarPoli'])->name('pasien.daftarPoli');
 });
 
