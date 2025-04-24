@@ -40,18 +40,6 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
-        'admin' => [
-            'driver' => 'session',
-            'provider' => 'admins', // Pastikan Anda menggunakan provider yang benar
-        ],
-        'dokter' => [
-            'driver' => 'session',
-            'provider' => 'dokters', // Pastikan Anda menggunakan provider yang benar
-        ],
-        'pasien' => [
-            'driver' => 'session',
-            'provider' => 'pasiens', // Pastikan Anda menggunakan provider yang benar
-        ],
     ],
 
     /*
@@ -72,17 +60,9 @@ return [
     */
 
     'providers' => [
-        'admins' => [
+        'users' => [
             'driver' => 'eloquent',
-            'model' => App\Models\Admin::class, // Model Admin
-        ],
-        'dokters' => [
-            'driver' => 'eloquent',
-            'model' => App\Models\Dokter::class, // Model Dokter
-        ],
-        'pasiens' => [
-            'driver' => 'eloquent',
-            'model' => App\Models\Pasien::class, // Model Pasien
+            'model' => env('AUTH_MODEL', App\Models\User::class),
         ],
 
         // 'users' => [

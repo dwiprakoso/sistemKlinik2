@@ -1,83 +1,150 @@
 <?php
 
-use App\Models\Dokter;
-use App\Models\Pasien;
-use App\Models\JadwalPeriksa;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Candidate\RoomCandidateController;
+use App\Http\Controllers\Candidate\StatusController;
+use App\Http\Controllers\Candidate\SubmissionController;
+use App\Http\Controllers\candidatesController;
+use App\Http\Controllers\LandingPageController;
+use App\Http\Controllers\Recruiter\SubmissionRecruiterController;
+use App\Http\Controllers\recruiterController;
+use App\Http\Controllers\adminController;
+use App\Http\Controllers\MessageController;
+use App\Http\Controllers\RoomController;
+use App\Models\RoomCandidate;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ObatController;
-use App\Http\Controllers\PoliController;
-use App\Http\Controllers\AdminController;
-use App\Http\Controllers\DokterController;
-use App\Http\Controllers\PasienController;
-use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Auth\RegisterController;
-use App\Http\Controllers\DaftarPoliController;
-use App\Http\Controllers\JadwalPeriksaController;
-use App\Models\DaftarPoli;
 
-Route::get('/', function () {
-    return view('welcome'); // The default page with card options
+Route::middleware('guest')->group(function () {
+    Route::get('/', [LandingPageController::class, 'index'])->name('landingPage');
+    Route::get('/lowongan', [LandingPageController::class, 'cariLowongan'])->name('cariLowongan');
+    
+
+    Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [AuthController::class, 'login'])->middleware('save.selected.tab');
+
+    Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
+    Route::post('/register', [AuthController::class, 'register'])->middleware('save.selected.tab');
+
+
+    // Route untuk identitas peserta
+    Route::get('/identityForm/{username}', [AuthController::class, 'showIdentityForm'])->name('identityForm');
+    Route::post('/identityForm/{username}', [AuthController::class, 'lengkapiProfil'])->name('updateIdentity');
+
+    // Route untuk identitas perusahaan
+    Route::get('/companyForm/{id}', [AuthController::class, 'showCompanyIdentityForm'])->name('showCompanyIdentityForm');
+    Route::post('/companyForm/{id}', [AuthController::class, 'RegisterCompany'])->name('RegisterCompany');
 });
 
-// Routes for Patient Registration
-Route::get('/register-pasien', [RegisterController::class, 'showPasienRegisterForm'])->name('register.pasien');
-Route::post('/register-pasien', [RegisterController::class, 'registerPasien']);
+Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::get('/profile', [AuthController::class, 'profile'])->name('profile');
 
-// Dynamic Login Form
-Route::get('/login/{role}', [LoginController::class, 'showLoginForm'])->name('login');
-Route::post('/login/{role}', [LoginController::class, 'login']);
 
-// Proteksi untuk route admin
-Route::middleware('auth:admin')->group(function () {
-    Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
-    Route::get('/admin/obat', [ObatController::class, 'admin'])->name('admin.obat');
-    Route::get('/admin/obat/create', [ObatController::class, 'create'])->name('admin.obat.create');
-    Route::post('/admin/obat/store', [ObatController::class, 'store'])->name('admin.obat.store');
-    Route::get('/admin/obat/edit/{obat}', [ObatController::class, 'edit'])->name('admin.obat.edit');
-    Route::put('/admin/obat/update/{obat}', [ObatController::class, 'update'])->name('admin.obat.update');
-    Route::get('/admin/obat/destroy/{obat}', [ObatController::class, 'destroy'])->name('admin.obat.destroy');
-    Route::get('/admin/pasien', [PasienController::class, 'admin'])->name('admin.pasien');
-    Route::get('/admin/pasien/create', [PasienController::class, 'create'])->name('admin.pasien.create');
-    Route::post('/admin/pasien/store', [PasienController::class, 'store'])->name('admin.pasien.store');
-    Route::get('/admin/pasien/edit/{pasien}', [PasienController::class, 'edit'])->name('admin.pasien.edit');
-    Route::put('/admin/pasien/update/{pasien}', [PasienController::class, 'update'])->name('admin.pasien.update');
-    Route::delete('/admin/pasien/destroy/{pasien}', [PasienController::class, 'destroy'])->name('admin.pasien.destroy');
-    Route::get('/admin/dokter', [DokterController::class, 'admin'])->name('admin.dokter');
-    Route::get('/admin/dokter/create', [DokterController::class, 'create'])->name('admin.dokter.create');
-    Route::post('/admin/dokter/store', [DokterController::class, 'store'])->name('admin.dokter.store');
-    Route::get('/admin/dokter/edit/{poli}', [DokterController::class, 'edit'])->name('admin.dokter.edit');
-    Route::put('/admin/dokter/update/{poli}', [DokterController::class, 'update'])->name('admin.dokter.update');
-    Route::delete('/admin/dokter/destroy/{poli}', [DokterController::class, 'destroy'])->name('admin.dokter.destroy');
-    Route::get('/admin/poli', [PoliController::class, 'admin'])->name('admin.poli');
-    Route::get('/admin/poli/create', [PoliController::class, 'create'])->name('admin.poli.create');
-    Route::post('/admin/poli/store', [PoliController::class, 'store'])->name('admin.poli.store');
-    Route::get('/admin/poli/edit/{poli}', [PoliController::class, 'edit'])->name('admin.poli.edit');
-    Route::put('/admin/poli/update/{poli}', [PoliController::class, 'update'])->name('admin.poli.update');
-    Route::delete('/admin/poli/destroy/{poli}', [PoliController::class, 'destroy'])->name('admin.poli.destroy');
+
+Route::prefix('dashboard')->group(function () {
+
+    // Kandidat routes
+    Route::prefix('kandidat')->middleware('role:participant')->group(function () {
+        Route::get('/', [CandidatesController::class, 'index'])->name('dashboard.kandidat');
+        Route::get('/profile', [CandidatesController::class, 'showProfile'])->name('dashboard.kandidat.showProfile');
+        Route::post('/profile', [CandidatesController::class, 'updateProfile'])->name('dashboard.kandidat.updateProfile');
+        Route::post('/profile/update-photo', [CandidatesController::class, 'updatePhoto'])->name('dashboard.kandidat.updatePhoto');
+        Route::post('/profile/add-education', [CandidatesController::class, 'addEducation'])->name('dashboard.kandidat.addEducation');
+        Route::post('/profile/add-experience', [CandidatesController::class, 'addExperience'])->name('dashboard.kandidat.addExperience');
+        // Message
+        Route::get('/message', [MessageController::class, 'index'])->name('dashboard.kandidat.message');
+        Route::get('/message/new', [MessageController::class, 'newConversation'])->name('dashboard.kandidat.newMessage');
+        Route::post('/message/start', [MessageController::class, 'startConversation'])->name('dashboard.kandidat.startMessage'); 
+        Route::get('/message/conversation/{userId}', [MessageController::class, 'showConversation'])->name('dashboard.kandidat.showMessage');
+        Route::post('/message/send', [MessageController::class, 'sendMessage'])->name('dashboard.kandidat.sendMessage');
+
+
+        Route::get('/lowongan', [CandidatesController::class, 'lowongan'])->name('dashboard.kandidat.lowongan');
+
+        Route::controller(StatusController::class)->prefix('status')->name('dashboard.kandidat.status')->group(function () {
+            Route::get('/', 'index');
+            Route::get('/detail/{id}', 'detail')->name('.detail');
+        });
+        // Route::get('/status', [CandidatesController::class, 'status'])->name('dashboard.kandidat.status');
+
+        Route::get('/create-cv', [CandidatesController::class, 'cvMaker'])->name('dashboard.kandidat.cvMaker');
+        // Route::get('/statusDetail', [CandidatesController::class, 'statusDetail'])->name('dashboard.kandidat.statusDetail');
+        Route::post('/store-cv', [candidatesController::class, 'storeCv'])->name('dashboard.kandidat.storeCv');
+        Route::get('/dashboard/kandidat/cv/export/{id}', [candidatesController::class, 'exportPdf'])->name('dashboard.kandidat.exportPdf');
+
+        Route::prefix('apply')->controller(RoomCandidateController::class)->group(function () {
+            Route::get('/{id}', 'apply')->name('kandidat.apply');
+        });
+
+        Route::prefix('submission')->controller(SubmissionController::class)->group(function () {
+            Route::post('/pemberkasan', 'submissionPemberkasan')->name('kandidat.submissionPemberkasan');
+            Route::post('/challenges', 'submissionChallenges')->name('kandidat.submissionChallenges');
+            Route::post('/meeting-invitation', 'submissionMeetingInvitation')->name('kandidat.submissionMeetingInvitation');
+        });
+    });
+
+    // Recruiter routes
+    Route::prefix('recruiter')->middleware('role:recruiter')->group(function () {
+        Route::get('/', [RecruiterController::class, 'index'])->name('dashboard.recruiter');
+
+        Route::get('/company-profile', [RecruiterController::class, 'companyProfile'])->name('dashboard.recruiter.companyProfile');
+        Route::post('/company-profile', [RecruiterController::class, 'updateCompanyProfile'])->name('dashboard.recruiter.updateCompanyProfile');
+        Route::put('/company-profile/update-logo', [RecruiterController::class, 'updateLogo'])->name('dashboard.company-profile.update-logo');
+        Route::post('/company-profile/update-banner', [RecruiterController::class, 'updateBanner'])->name('dashboard.company-profile.update-banner');
+        Route::post('/company-profile/add-benefit', [RecruiterController::class, 'addBenefit'])->name('dashboard.company-profile.add-benefit');
+
+
+        Route::get('/selectionPathtesting', [RecruiterController::class, 'showSelectionPathTesting'])->name('dashboard.showSelectionPathTesting');
+        Route::post('/selectionPathtesting', [RecruiterController::class, 'selectionPathTesting'])->name('dashboard.selectionPathTesting');
+
+
+        Route::get('/companySettings', [recruiterController::class, 'companySettings'])->name('dashboard.recruiter.companySettings');
+
+        Route::get('/selectionRoom', [RoomController::class, 'selectionRoom'])->name('dashboard.recruiter.selectionRoom');
+        Route::post('/selectionRoom', [RoomController::class, 'store'])->name('dashboard.recruiter.selectionRoom.store');
+
+
+        Route::get('/selectionRoom/{id}', [RoomController::class, 'selectionRoomDetail'])->name('dashboard.recruiter.selectionRoom.detail');
+        Route::get('/candidate', [recruiterController::class, 'candidate'])->name('dashboard.recruiter.candidate');
+
+        // Message
+        Route::get('/message', [MessageController::class, 'indexRecruiter'])->name('dashboard.recruiter.message');
+        Route::get('/message/new', [MessageController::class, 'newConversationRecruiter'])->name('dashboard.recruiter.newMessage');
+        Route::post('/message/start', [MessageController::class, 'startConversation'])->name('dashboard.recruiter.startMessage'); 
+        Route::get('/message/conversation/{userId}', [MessageController::class, 'showConversation'])->name('dashboard.recruiter.showMessage');
+        Route::post('/message/send', [MessageController::class, 'sendMessage'])->name('dashboard.recruiter.sendMessage');
+
+        // Join or Create Company routes
+        Route::post('/join-company', [recruiterController::class, 'joinCompany'])->name('dashboard.recruiter.joinCompany');
+        Route::post('/create-company', [recruiterController::class, 'createCompany'])->name('dashboard.recruiter.createCompany');
+
+        // View forms for joining or creating company
+        Route::get('/join-company-form', [recruiterController::class, 'showJoinCompanyForm'])->name('dashboard.recruiter.showJoinCompanyForm');
+        Route::get('/create-company-form', [recruiterController::class, 'showCreateCompanyForm'])->name('dashboard.recruiter.showCreateCompanyForm');
+
+        Route::controller(SubmissionRecruiterController::class)->prefix('submission')->name('dashboard.recruiter.submission')->group(function () {
+            Route::post('/lolos-berkas', 'lolosBerkas')->name('.lolosBerkas');
+            Route::post('/lolos-challange', 'lolosChallange')->name('.lolosChallange');
+            Route::post('/lolos-meeting-invitation', 'lolosMeetingInvitation')->name('.lolosMeetingInvitation');
+        });
+    });
+    // Admin routes
+    Route::prefix('admin')->middleware('role:admin')->group(function () {
+        Route::get('/', [adminController::class, 'index'])->name('dashboard.admin');
+        Route::get('/verification-recruiter', [adminController::class, 'verificationRecruiter'])->name('dashboard.admin.verificationRecruiter');
+        // Fix the route by removing the extra 'admin/' from the path
+        Route::post('/company/{company}/update-status', [adminController::class, 'updateCompanyStatus'])->name('admin.updateCompanyStatus');
+        Route::post('/verify-company/{company}', [adminController::class, 'verifyCompany'])->name('admin.verifyCompany');
+        Route::post('/reject-company/{company}', [adminController::class, 'rejectCompany'])->name('admin.rejectCompany');
+        Route::get('/analisis-sistem', [adminController::class, 'analisisSistem'])->name('dashboard.admin.analisisSistem');
+        Route::get('/kelola-sistem', [adminController::class, 'kelolaSistem'])->name('dashboard.admin.kelolaSistem');
+        Route::put('/update-room-status/{room}', [adminController::class, 'updateRoomStatus'])->name('admin.updateRoomStatus');
+        Route::get('/kelola-administrasi', [adminController::class, 'kelolaAdministrasi'])->name('dashboard.admin.kelolaAdministrasi');
+    });
 });
 
-// Proteksi untuk route dokter
-Route::middleware('auth:dokter')->group(function () {
-    Route::get('/dokter/dashboard', [DokterController::class, 'index'])->name('dokter.dashboard');
-    Route::get('/dokter/jadwal', [JadwalPeriksaController::class, 'index'])->name('dokter.jadwal');
-    Route::get('/dokter/jadwal/create', [JadwalPeriksaController::class, 'create'])->name('dokter.jadwal.create');
-    Route::post('/dokter/jadwal/store', [JadwalPeriksaController::class, 'store'])->name('dokter.jadwal.store');
-    Route::get('/dokter/jadwal/{id}/edit', [JadwalPeriksaController::class, 'edit'])->name('dokter.jadwal.edit');
-    Route::put('/dokter/jadwal/{id}', [JadwalPeriksaController::class, 'update'])->name('dokter.jadwal.update');
-    Route::get('/dokter/profil', [DokterController::class, 'editProfil'])->name('dokter.editProfil');
-    Route::put('/dokter/profil', [DokterController::class, 'updateProfil'])->name('dokter.updateProfil');
-    Route::get('/dokter/riwayat', [PasienController::class, 'riwayatPasien'])->name('dokter.riwayatPasien');
-    Route::get('/dokter/periksa', [DaftarPoliController::class, 'index'])->name('dokter.periksaPasien');
-});
-
-// Proteksi untuk route pasien
-Route::middleware('auth:pasien')->group(function () {
-    Route::get('/pasien/dashboard', [PasienController::class, 'index'])->name('pasien.dashboard');
-    // Route untuk menangani request AJAX
-    Route::get('/pasien/daftar-poli', [PasienController::class, 'daftarPoli'])->name('pasien.daftarPoli');
-});
-
-// Route logout
-Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 
+Route::get('/password/reset', [AuthController::class, 'showForgotPasswordForm'])->name('password.request');
+Route::post('/password/email', [AuthController::class, 'sendResetLinkEmail'])->name('password.email');
+Route::get('/password/reset/{token}', [AuthController::class, 'showResetForm'])->name('password.reset');
+Route::post('/password/reset', [AuthController::class, 'resetPassword'])->name('password.update');

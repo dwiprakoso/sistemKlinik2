@@ -1,20 +1,32 @@
-import defaultTheme from 'tailwindcss/defaultTheme';
-
 /** @type {import('tailwindcss').Config} */
 export default {
-    content: [
-        './vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php',
-        './storage/framework/views/*.php',
-        './resources/**/*.blade.php',
-        './resources/**/*.js',
-        './resources/**/*.vue',
-    ],
-    theme: {
-        extend: {
-            fontFamily: {
-                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
-            },
-        },
+  content: [
+    "./resources/**/*.blade.php",
+    "./resources/**/*.js",
+    "./resources/**/*.vue",
+    "./node_modules/flowbite/**/*.js"
+  ],
+  theme: {
+    extend: {
+      fontFamily: {
+        'poppins': ['Poppins'],
+      },
+      colors: {
+        'abu-abu': '#8a8a8a',
+        'e73002' : '#e73002',
+        'fd7d09' : '#fd7d09',
+        'fd1d02' : '#fd1d02',
+        'negative': '#EF4423',
+        'negative-hover': '#D53A12',
+        'positive': '#50C878',
+        'positive-hover': '#409c5d',
+      },
     },
-    plugins: [],
-};
+  },
+  plugins: [
+    require('flowbite/plugin')({
+      charts: true,
+    }),
+  ],
+}
+
